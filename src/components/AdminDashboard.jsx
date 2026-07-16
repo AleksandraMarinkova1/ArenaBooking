@@ -31,7 +31,7 @@ export default function AdminDashboard() {
 
   // Функција за влечење на дефинираните термини од базата
   const fetchTimeSlots = () => {
-    fetch("http://localhost:3000/api/timeSlots")
+    fetch(`${import.meta.env.VITE_API_URL}/api/timeSlots`)
       .then((res) => res.json())
       .then((data) => {
         setTimeSlots(data);
@@ -48,7 +48,7 @@ export default function AdminDashboard() {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/timeSlots", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/timeSlots`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slotText: newSlotText })
@@ -72,7 +72,7 @@ export default function AdminDashboard() {
     if (!window.confirm("Дали сте сигурни дека сакате трајно да го избришете овој термин?")) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/timeSlots/${id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/timeSlots/${id}`, {
         method: "DELETE"
       });
 
@@ -111,7 +111,7 @@ export default function AdminDashboard() {
     };
 
     try {
-      const res = await fetch("http://localhost:3000/api/bookings/block", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/block`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -139,7 +139,7 @@ export default function AdminDashboard() {
   const fetchAllBookings = async () => {
     setLoading(true);
     try {
-      let url = `http://localhost:3000/api/bookings?date=${selectedDate}&court=${selectedCourt}`;
+     let url = `${import.meta.env.VITE_API_URL}/api/bookings?date=${selectedDate}&court=${selectedCourt}`;
       const res = await fetch(url);
 
       if (res.ok) {
@@ -170,7 +170,7 @@ export default function AdminDashboard() {
     fetchTimeSlots(); // Иницијално влечење на сите дефинирани термини
 
     const newConnection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:3000/bookingHub")
+      .withUrl(`${import.meta.env.VITE_API_URL}/bookingHub`)
       .withAutomaticReconnect()
       .build();
     setConnection(newConnection);
@@ -229,7 +229,7 @@ export default function AdminDashboard() {
     if (!window.confirm(question)) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/bookings/${id}`, {
+     const response = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/${id}`, {
         method: "DELETE",
       });
 
