@@ -48,7 +48,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "https://tvojot-frontend.vercel.app") // Овде после ќе го ставиме точниот линк од Vercel
+        policy.WithOrigins("http://localhost:5173", "https://arena-booking-frontend.vercel.app") // Овде после ќе го ставиме точниот линк од Vercel
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials(); // Потребно за SignalR
