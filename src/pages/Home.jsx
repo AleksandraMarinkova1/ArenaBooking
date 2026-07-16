@@ -38,8 +38,7 @@ export default function Home() {
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState(""); // 🚀 1. НОВА СОСТОЈБА ЗА Е-ПОШТА
-  const API_URL =
-    API_URL || "https://arenabooking-wupc.onrender.com";
+  const API_URL = "https://arenabooking-wupc.onrender.com";
   const fetchTimeSlots = () => {
     fetch(`${API_URL}/api/timeSlots`)
       .then((res) => res.json())
