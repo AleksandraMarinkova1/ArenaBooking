@@ -1,0 +1,10 @@
+@base_address = "http://localhost:3000/api/people"
+GET {{base_address}}
+Content-Type: application/json
+
+# {"FirstName":"John",
+#   "LastName":"Doe",
+# }
+
+
+
