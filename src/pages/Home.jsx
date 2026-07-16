@@ -40,7 +40,7 @@ export default function Home() {
   const [email, setEmail] = useState(""); // 🚀 1. НОВА СОСТОЈБА ЗА Е-ПОШТА
 
   const fetchTimeSlots = () => {
-    fetch("http://localhost:3000/api/timeSlots")
+   fetch(`${import.meta.env.VITE_API_URL}/api/timeSlots`)
       .then((res) => res.json())
       .then((data) => {
         // Само ги земаме термините кои постојат во базата (кои сега ги содржат и дефолтните)
@@ -53,9 +53,7 @@ export default function Home() {
   };
 
   const fetchBookings = () => {
-    fetch(
-      `http://localhost:3000/api/bookings?date=${selectedDate}&court=${selectedCourt}`,
-    )
+   fetch(`${import.meta.env.VITE_API_URL}/api/bookings?date=${selectedDate}&court=${selectedCourt}`)
       .then((res) => res.json())
       .then((data) => {
         // Нормализација на податоците за да бидеме сигурни за малите и големите букви од C#
@@ -79,7 +77,7 @@ export default function Home() {
 
   useEffect(() => {
     const newConnection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:3000/bookingHub")
+     .withUrl(`${import.meta.env.VITE_API_URL}/bookingHub`)
       .withAutomaticReconnect()
       .build();
 
@@ -256,7 +254,7 @@ export default function Home() {
     };
 
     try {
-      const response = await fetch("http://localhost:3000/api/bookings", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newBooking),
