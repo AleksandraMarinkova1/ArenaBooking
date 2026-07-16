@@ -38,9 +38,10 @@ export default function Home() {
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState(""); // 🚀 1. НОВА СОСТОЈБА ЗА Е-ПОШТА
-
+  const API_URL =
+    API_URL || "https://arenabooking-wupc.onrender.com";
   const fetchTimeSlots = () => {
-   fetch(`${import.meta.env.VITE_API_URL}/api/timeSlots`)
+    fetch(`${API_URL}/api/timeSlots`)
       .then((res) => res.json())
       .then((data) => {
         // Само ги земаме термините кои постојат во базата (кои сега ги содржат и дефолтните)
@@ -53,7 +54,9 @@ export default function Home() {
   };
 
   const fetchBookings = () => {
-   fetch(`${import.meta.env.VITE_API_URL}/api/bookings?date=${selectedDate}&court=${selectedCourt}`)
+    fetch(
+      `${API_URL}/api/bookings?date=${selectedDate}&court=${selectedCourt}`,
+    )
       .then((res) => res.json())
       .then((data) => {
         // Нормализација на податоците за да бидеме сигурни за малите и големите букви од C#
@@ -77,7 +80,7 @@ export default function Home() {
 
   useEffect(() => {
     const newConnection = new signalR.HubConnectionBuilder()
-     .withUrl(`${import.meta.env.VITE_API_URL}/bookingHub`)
+      .withUrl(`${API_URL}/bookingHub`)
       .withAutomaticReconnect()
       .build();
 
@@ -203,8 +206,6 @@ export default function Home() {
     return startHour <= currentHour;
   };
 
-  
-    
   const handleSlotClick = async (slot) => {
     setSelectedSlot(slot);
     setIsBookingOpen(true);
@@ -254,11 +255,14 @@ export default function Home() {
     };
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newBooking),
-      });
+      const response = await fetch(
+        `${API_URL}/api/bookings`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newBooking),
+        },
+      );
 
       if (response.ok) {
         toast.success("Успешно резервиравте термин!");

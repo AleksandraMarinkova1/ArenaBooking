@@ -6,6 +6,7 @@ export default function AdminSlotsManager() {
   const [newSlotText, setNewSlotText] = useState(""); // за внес на нов термин (пр. "22:00 - 23:00")
 
   // Влечење на сите активни термини од базата
+  console.log('aaaa',import.meta.env.VITE_API_URL);
   const fetchSlots = () => {
     fetch(`${import.meta.env.VITE_API_URL}/api/timeSlots`)
       .then((res) => res.json())
