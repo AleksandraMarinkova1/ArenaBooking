@@ -11,10 +11,28 @@ builder.Services.AddSignalR();
 // 🚀 ПОВРЗУВАЊЕ СО БАЗАТА (Паметна селекција: PostgreSQL за Live, SQLite за Локално)
 if (builder.Environment.IsProduction())
 {
-    // Кога е на Render, ја користи онлајн PostgreSQL базата
-    var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+    // Кога е на Render, ја земаме Environment променливата
+    var rawConnectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+    
+    string formattedConnectionString = rawConnectionString;
+
+    // Ако линкот почнува со postgresql://, го конвертираме во формат за .NET
+    if (!string.IsNullOrEmpty(rawConnectionString) && rawConnectionString.StartsWith("postgresql://"))
+    {
+        var databaseUrl = new Uri(rawConnectionString);
+        var userInfo = databaseUrl.UserInfo.Split(':');
+        
+        var username = userInfo[0];
+        var password = userInfo.Length > 1 ? userInfo[1] : "";
+        var host = databaseUrl.Host;
+        var port = databaseUrl.Port == -1 ? 5432 : databaseUrl.Port;
+        var database = databaseUrl.LocalPath.TrimStart('/');
+
+        formattedConnectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true;";
+    }
+
     builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseNpgsql(connectionString));
+        options.UseNpgsql(formattedConnectionString));
 }
 else
 {
