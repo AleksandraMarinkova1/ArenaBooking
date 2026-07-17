@@ -1,16 +1,41 @@
 # React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# ArenaBooking
+A real-time, full-stack application for booking sports courts, ensuring seamless synchronization and conflict prevention.
 
-Currently, two official plugins are available:
+# Key Features
+Real-time Updates: Instant UI synchronization using SignalR websockets.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Concurrency Control: Prevents double-booking through an active slot-locking system.
 
-## React Compiler
+Dynamic Search: Filter availability by date, court type, and time.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Tech Stack: React (Frontend), ASP.NET Core (Backend), SignalR, Tailwind CSS, Vercel/Render Deployment.
 
-## Expanding the ESLint configuration
+## 🛠 Tech Stack
+* **Frontend:** React, Tailwind CSS, SignalR Client, React Hot Toast
+* **Backend:** ASP.NET Core, SignalR, Entity Framework
+* **Deployment:** Vercel (Frontend), Render (Backend)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## ⚙️ Getting Started
+
+### Prerequisites
+* [Node.js](https://nodejs.org/) installed
+* [.NET 8.0 SDK](https://dotnet.microsoft.com/) or later
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/your-username/arena-booking.git](https://github.com/your-username/arena-booking.git)
+   cd arena-booking
+
+  #### Setup Backend
+  cd backend
+dotnet restore
+dotnet run
+
+### Setup Frontend:
+cd ../frontend
+npm install
+npm run dev
