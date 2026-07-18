@@ -7,6 +7,7 @@ import { AuthProvider } from './components/auth/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navigation from './components/Navigation';
 import Login from './components/Login'; // Го чуваме само Login
+import ChatBot from './components/ChatBot'
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
           } 
         />
       </Routes>
+      <ChatBot />
     </AuthProvider>
   );
 }
