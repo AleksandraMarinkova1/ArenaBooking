@@ -5,12 +5,18 @@ const ChatBot = () => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
 
- const sendMessage = async () => {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/aiassistant/ask`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input)
+const sendMessage = async () => {
+    const url = "https://arenabooking-wupc.onrender.com/api/aiassistant/ask";
+
+    const res = await fetch(url, {
+        method: "POST",
+        headers: { 
+            "Content-Type": "application/json" 
+        },
+        body: JSON.stringify(input)
     });
+
+    // ... остатокот
 
     if (!res.ok) {
         console.error("Грешка при повик:", await res.text());
