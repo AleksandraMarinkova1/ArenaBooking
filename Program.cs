@@ -59,6 +59,7 @@ var app = builder.Build();
 
 // 3. Активирај ги middlewares по точен редослед
 app.UseCors("AllowAll");
+app.UseRouting();
 app.UseAuthorization();
 app.MapControllers(); 
 app.MapHub<BookingHub>("/bookingHub");
