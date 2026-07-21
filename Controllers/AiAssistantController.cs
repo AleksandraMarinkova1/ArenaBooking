@@ -1,48 +1,80 @@
 using Microsoft.AspNetCore.Mvc;
-using Backend.Models;
-using OpenAI;
-using OpenAI.Chat;
-using Microsoft.Extensions.Configuration;
+using System.Net.Http.Json;
+using System.Text.Json;
 
-namespace Backend.Controllers
+[Route("api/[controller]")]
+[ApiController]
+public class AiAssistantController : ControllerBase
 {
-    [Route("api/aiassistant")]
-    [ApiController]
-    public class AiAssistantController : ControllerBase
+    private readonly IConfiguration _configuration;
+    private readonly HttpClient _httpClient;
+
+    public AiAssistantController(IConfiguration configuration, HttpClient httpClient)
     {
-        private readonly AppDbContext _context;
-        private readonly IConfiguration _configuration;
+        _configuration = configuration;
+        _httpClient = httpClient;
+    }
 
-        public AiAssistantController(AppDbContext context, IConfiguration configuration)
+    [HttpPost("ask")]
+    public async Task<IActionResult> Ask([FromBody] UserMessageDto dto)
+    {
+        
+        var apiKey = _configuration["Gemini:ApiKey"] ?? Environment.GetEnvironmentVariable("Gemini__ApiKey");
+
+        if (string.IsNullOrEmpty(apiKey))
         {
-            Console.WriteLine("--- AI ASSISTANT CONTROLLER INITIALIZED ---");
-            _context = context;
-            _configuration = configuration;
+            return BadRequest(new { error = "Gemini API key is not configured." });
         }
-
-        [HttpPost("ask")]
-        public async Task<IActionResult> Ask([FromBody] string userMessage)
-        {
-          
-var slots = _context.Bookings.Where(b => !b.IsBlocked).Take(5).ToList();
-string slotInfo = string.Join(", ", slots.Select(s => $"{s.Court} во {s.TimeSlot}"));
 
        
-            var apiKey = _configuration["OpenAI:ApiKey"];
-            var client = new OpenAIClient(apiKey);
-            var chatClient = client.GetChatClient("gpt-4o");
+        var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={apiKey}";
 
-         
-            var messages = new List<ChatMessage>
+   
+        var requestBody = new
+        {
+            contents = new[]
             {
-                new SystemChatMessage($"Ти си асистент за ArenaBooking. Слободни термини се: {slotInfo}. Ако корисникот праша за термин, предложи му некој од овие и дај му линк: /booking"),
-                new UserChatMessage(userMessage)
-            };
+                new
+                {
+                    parts = new[]
+                    {
+                        new { text = dto.UserMessage }
+                    }
+                }
+            }
+        };
 
-        
-            ChatCompletion completion = await chatClient.CompleteChatAsync(messages);
+        try
+        {
+      
+            var response = await _httpClient.PostAsJsonAsync(url, requestBody);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorDetails = await response.Content.ReadAsStringAsync();
+                return StatusCode((int)response.StatusCode, new { error = "Gemini API error", details = errorDetails });
+            }
 
-            return Ok(completion.Content[0].Text);
+            var jsonResponse = await response.Content.ReadFromJsonAsync<JsonElement>();
+
+     
+            var aiReply = jsonResponse
+                .GetProperty("candidates")[0]
+                .GetProperty("content")
+                .GetProperty("parts")[0]
+                .GetProperty("text")
+                .GetString();
+
+            return Ok(new { reply = aiReply });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
         }
     }
+}
+
+public class UserMessageDto
+{
+    public string UserMessage { get; set; }
 }
