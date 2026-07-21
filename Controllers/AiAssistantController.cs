@@ -18,7 +18,6 @@ public class AiAssistantController : ControllerBase
     [HttpPost("ask")]
     public async Task<IActionResult> Ask([FromBody] UserMessageDto dto)
     {
-        
         var apiKey = _configuration["Gemini:ApiKey"] ?? Environment.GetEnvironmentVariable("Gemini__ApiKey");
 
         if (string.IsNullOrEmpty(apiKey))
@@ -26,10 +25,8 @@ public class AiAssistantController : ControllerBase
             return BadRequest(new { error = "Gemini API key is not configured." });
         }
 
-       
         var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={apiKey}";
 
-   
         var requestBody = new
         {
             contents = new[]
@@ -38,7 +35,7 @@ public class AiAssistantController : ControllerBase
                 {
                     parts = new[]
                     {
-                        new { text = dto.UserMessage }
+                        new { text = dto?.UserMessage ?? "Hello" }
                     }
                 }
             }
@@ -46,19 +43,20 @@ public class AiAssistantController : ControllerBase
 
         try
         {
-      
             var response = await _httpClient.PostAsJsonAsync(url, requestBody);
-            
+            var responseString = await response.Content.ReadAsStringAsync();
+
+            // 
             if (!response.IsSuccessStatusCode)
             {
-                var errorDetails = await response.Content.ReadAsStringAsync();
-                return StatusCode((int)response.StatusCode, new { error = "Gemini API error", details = errorDetails });
+                return StatusCode((int)response.StatusCode, new { 
+                    googleError = responseString, 
+                    usedUrl = url.Replace(apiKey, "HIDDEN_KEY") 
+                });
             }
 
-            var jsonResponse = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-     
-            var aiReply = jsonResponse
+            var jsonResponse = JsonDocument.Parse(responseString);
+            var aiReply = jsonResponse.RootElement
                 .GetProperty("candidates")[0]
                 .GetProperty("content")
                 .GetProperty("parts")[0]
@@ -69,7 +67,7 @@ public class AiAssistantController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { error = ex.Message });
+            return StatusCode(500, new { error = ex.Message, stack = ex.StackTrace });
         }
     }
 }
