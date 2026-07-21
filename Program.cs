@@ -1,22 +1,24 @@
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 using Backend.Hubs;
+using Backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Додади контролери и сокети (SignalR)
-builder.Services.AddControllers(); 
-builder.Services.AddSignalR();
 
-// 🚀 ПОВРЗУВАЊЕ СО БАЗАТА (Паметна селекција: PostgreSQL за Live, SQLite за Локално)
+builder.Services.AddControllers();
+builder.Services.AddSignalR();
+builder.Services.AddHostedService<BookingReminderService>();
+
+
 if (builder.Environment.IsProduction())
 {
-    // Кога е на Render, ја земаме Environment променливата
+   
     var rawConnectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
     
     string formattedConnectionString = rawConnectionString;
 
-    // Ако линкот почнува со postgresql://, го конвертираме во формат за .NET
+    
     if (!string.IsNullOrEmpty(rawConnectionString) && rawConnectionString.StartsWith("postgresql://"))
     {
         var databaseUrl = new Uri(rawConnectionString);
@@ -36,7 +38,8 @@ if (builder.Environment.IsProduction())
 }
 else
 {
-    // Кога си локално на твојот компјутер, си останува SQLite
+   
+
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
                            ?? "Data Source=bookings.db";
     builder.Services.AddDbContext<AppDbContext>(options =>
@@ -61,20 +64,20 @@ app.UseCors("AllowAll");
 app.UseRouting();
 app.UseAuthorization();
 app.MapControllers(); 
+
 app.MapHub<BookingHub>("/bookingHub");
 
-// 4. Автоматско менаџирање и полнење на базата при стартување
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<AppDbContext>();
 
-    // Развојна пракса: Ја бришеме и пак ја креираме базата за да се аплицираат новите колони (Date, Court)
-    // Напомена: Ова е супер додека развиваш, кога ќе имаш реални корисници ќе го тргнеме EnsureDeleted()
+   
     context.Database.EnsureDeleted();
     context.Database.EnsureCreated();
 
-    // Ако табелата за термини (TimeSlots) е празна, ја полниме со почетните вредности
+   
     if (!context.TimeSlots.Any())
     {
         var defaultSlots = new List<TimeSlot>
@@ -100,5 +103,6 @@ using (var scope = app.Services.CreateScope())
         context.SaveChanges();
     }
 }
+
 
 app.Run();

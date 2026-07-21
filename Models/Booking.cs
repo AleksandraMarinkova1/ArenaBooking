@@ -10,6 +10,7 @@ public class Booking
     public string Date { get; set; } = string.Empty;
     public string Court { get; set; } = string.Empty;
     public string TimeSlot { get; set; } = string.Empty;
-    public bool IsBlocked { get; set; } = false; 
+    public bool IsBlocked { get; set; } = false;
     public string BlockReason { get; set; } = "";
+    public bool IsReminderSent { get; set; } = false;
 }
