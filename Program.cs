@@ -73,11 +73,9 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<AppDbContext>();
 
-   
-    context.Database.EnsureDeleted();
+    // 🔴 Тргни го EnsureDeleted() за да не ти се брише базата!
     context.Database.EnsureCreated();
 
-   
     if (!context.TimeSlots.Any())
     {
         var defaultSlots = new List<TimeSlot>
@@ -103,6 +101,5 @@ using (var scope = app.Services.CreateScope())
         context.SaveChanges();
     }
 }
-
 
 app.Run();
