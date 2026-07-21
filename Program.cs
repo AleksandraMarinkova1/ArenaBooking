@@ -43,15 +43,14 @@ else
         options.UseSqlite(connectionString));
 }
 
-// 2. Постави ја CORS полисата
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "https://arena-booking-frontend.vercel.app") // Овде после ќе го ставиме точниот линк од Vercel
+        policy.SetIsOriginAllowed(_ => true) 
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials(); // Потребно за SignalR
+              .AllowCredentials();
     });
 });
 
