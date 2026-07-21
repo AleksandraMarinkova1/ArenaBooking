@@ -18,56 +18,65 @@ public class AiAssistantController : ControllerBase
     [HttpPost("ask")]
     public async Task<IActionResult> Ask([FromBody] UserMessageDto dto)
     {
-        var apiKey = _configuration["Gemini:ApiKey"] ?? Environment.GetEnvironmentVariable("Gemini__ApiKey");
-
-        if (string.IsNullOrEmpty(apiKey))
-        {
-            return BadRequest(new { error = "Gemini API key is not configured." });
-        }
-
-        var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={apiKey}";
-
-        var requestBody = new
-        {
-            contents = new[]
-            {
-                new
-                {
-                    parts = new[]
-                    {
-                        new { text = dto?.UserMessage ?? "Hello" }
-                    }
-                }
-            }
-        };
-
         try
         {
+            if (dto == null || string.IsNullOrEmpty(dto.UserMessage))
+            {
+                return BadRequest(new { error = "Message cannot be empty." });
+            }
+
+            var apiKey = _configuration["Gemini:ApiKey"] ?? Environment.GetEnvironmentVariable("Gemini__ApiKey");
+
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                return BadRequest(new { error = "Gemini API key is not configured." });
+            }
+
+            var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={apiKey}";
+
+            var requestBody = new
+            {
+                contents = new[]
+                {
+                    new
+                    {
+                        parts = new[]
+                        {
+                            new { text = dto.UserMessage }
+                        }
+                    }
+                }
+            };
+
             var response = await _httpClient.PostAsJsonAsync(url, requestBody);
             var responseString = await response.Content.ReadAsStringAsync();
 
-            // 
             if (!response.IsSuccessStatusCode)
             {
-                return StatusCode((int)response.StatusCode, new { 
-                    googleError = responseString, 
-                    usedUrl = url.Replace(apiKey, "HIDDEN_KEY") 
-                });
+                return StatusCode((int)response.StatusCode, new { error = "Gemini API failed", details = responseString });
             }
 
-            var jsonResponse = JsonDocument.Parse(responseString);
-            var aiReply = jsonResponse.RootElement
-                .GetProperty("candidates")[0]
-                .GetProperty("content")
-                .GetProperty("parts")[0]
-                .GetProperty("text")
-                .GetString();
+            using var jsonDoc = JsonDocument.Parse(responseString);
+            var root = jsonDoc.RootElement;
 
-            return Ok(new { reply = aiReply });
+       
+            if (root.TryGetProperty("candidates", out var candidates) && candidates.GetArrayLength() > 0)
+            {
+                var firstCandidate = candidates[0];
+                if (firstCandidate.TryGetProperty("content", out var content) &&
+                    content.TryGetProperty("parts", out var parts) &&
+                    parts.GetArrayLength() > 0)
+                {
+                    var text = parts[0].GetProperty("text").GetString();
+                    return Ok(new { reply = text });
+                }
+            }
+
+            return StatusCode(500, new { error = "Invalid response structure from Gemini API." });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { error = ex.Message, stack = ex.StackTrace });
+            return StatusCode(500, new { error = ex.Message });
         }
     }
 }
