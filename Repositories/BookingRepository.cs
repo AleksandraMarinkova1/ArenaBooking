@@ -24,11 +24,12 @@ public class BookingRepository : IBookingRepository
         return booking;
     }
 
-    public async Task<bool> ExistsAsync(string date, string court, string timeSlot)
-    {
-        return await _context.Bookings.AnyAsync(b => 
-            b.Date.Trim() == date.Trim() && 
-            b.Court.Trim() == court.Trim() && 
-            b.TimeSlot.Trim() == timeSlot.Trim());
-    }
+  public async Task<bool> ExistsAsync(string date, string court, string timeSlot)
+{
+    return await _context.Bookings.AnyAsync(b => 
+        b.Date.ToLower() == date.ToLower() && 
+        b.Court.ToLower() == court.ToLower() && 
+        b.TimeSlot.ToLower() == timeSlot.ToLower() && 
+        !b.IsBlocked);
+}
 }

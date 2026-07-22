@@ -69,6 +69,10 @@
             "OpenAI": {
               "target": "Package",
               "version": "[2.12.0, )"
+            },
+            "Resend": {
+              "target": "Package",
+              "version": "[0.6.0, )"
             }
           },
           "imports": [

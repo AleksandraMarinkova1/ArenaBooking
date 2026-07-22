@@ -2,13 +2,19 @@ using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 using Backend.Hubs;
 using Backend.Services;
-using Backend.Repositories; // 👈 Додадено за репозиториумите
+using Backend.Repositories;
+using Resend;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddHostedService<BookingReminderService>();
+builder.Services.AddResend(options =>
+{
+    options.ApiToken = builder.Configuration["ResendApiKey"] ?? Environment.GetEnvironmentVariable("ResendApiKey") ?? "";
+});
+builder.Services.AddTransient<IEmailService, EmailService>();
 
 // 👉 Регистрирање на новите репозиториуми и сервиси (Mid-level архитектура)
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
