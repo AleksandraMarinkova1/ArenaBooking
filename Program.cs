@@ -2,23 +2,23 @@ using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 using Backend.Hubs;
 using Backend.Services;
+using Backend.Repositories; // 👈 Додадено за репозиториумите
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddHostedService<BookingReminderService>();
 
+// 👉 Регистрирање на новите репозиториуми и сервиси (Mid-level архитектура)
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<IBookingService, BookingService>();
 
 if (builder.Environment.IsProduction())
 {
-   
     var rawConnectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING");
-    
     string formattedConnectionString = rawConnectionString;
 
-    
     if (!string.IsNullOrEmpty(rawConnectionString) && rawConnectionString.StartsWith("postgresql://"))
     {
         var databaseUrl = new Uri(rawConnectionString);
@@ -38,8 +38,6 @@ if (builder.Environment.IsProduction())
 }
 else
 {
-   
-
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
                            ?? "Data Source=bookings.db";
     builder.Services.AddDbContext<AppDbContext>(options =>
@@ -59,7 +57,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-
 app.UseCors("AllowAll");
 app.UseRouting();
 app.UseAuthorization();
@@ -67,13 +64,11 @@ app.MapControllers();
 
 app.MapHub<BookingHub>("/bookingHub");
 
-
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<AppDbContext>();
 
-    // 🔴 Тргни го EnsureDeleted() за да не ти се брише базата!
     context.Database.EnsureCreated();
 
     if (!context.TimeSlots.Any())
