@@ -3,8 +3,9 @@ export default function BookingModal({
   isOpen, onClose, slot, court, date, 
   fullName, setFullName, 
   phoneNumber, setPhoneNumber,
-  email, setEmail, // Нови пропсеви
-  onSubmit 
+  email, setEmail,
+  onSubmit ,
+  isSubmitting,
 }) {
   if (!isOpen) return null;
 
@@ -35,7 +36,13 @@ export default function BookingModal({
 
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
             <button type="button" onClick={onClose} style={{ padding: '10px 15px', backgroundColor: '#e2e8f0', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>Откажи</button>
-            <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#3182ce', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Потврди</button>
+            <button 
+              type="submit" 
+              disabled={isSubmitting} // 👈 3. Заклучување на потврдата
+              style={{ padding: '10px 20px', backgroundColor: isSubmitting ? '#90cdf4' : '#3182ce', color: 'white', border: 'none', borderRadius: '6px', cursor: isSubmitting ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}
+            >
+              {isSubmitting ? "Се резервира..." : "Потврди"} {/* 👈 4. Динамичен текст */}
+            </button>
           </div>
         </form>
       </div>

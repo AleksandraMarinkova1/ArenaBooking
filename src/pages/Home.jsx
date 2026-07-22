@@ -36,6 +36,7 @@ export default function Home() {
 
   // состојби за формата
   const [fullName, setFullName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState(""); // 🚀 1. НОВА СОСТОЈБА ЗА Е-ПОШТА
   const API_URL = "https://arenabooking-wupc.onrender.com";
@@ -53,9 +54,7 @@ export default function Home() {
   };
 
   const fetchBookings = () => {
-    fetch(
-      `${API_URL}/api/bookings?date=${selectedDate}&court=${selectedCourt}`,
-    )
+    fetch(`${API_URL}/api/bookings?date=${selectedDate}&court=${selectedCourt}`)
       .then((res) => res.json())
       .then((data) => {
         // Нормализација на податоците за да бидеме сигурни за малите и големите букви од C#
@@ -242,7 +241,9 @@ export default function Home() {
 
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedSlot) return;
+    if (!selectedSlot || isSubmitting) return;
+
+    setIsSubmitting(true);
 
     const newBooking = {
       fullName,
@@ -254,14 +255,11 @@ export default function Home() {
     };
 
     try {
-      const response = await fetch(
-        `${API_URL}/api/bookings`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newBooking),
-        },
-      );
+      const response = await fetch(`${API_URL}/api/bookings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newBooking),
+      });
 
       if (response.ok) {
         toast.success("Успешно резервиравте термин!");
@@ -277,6 +275,8 @@ export default function Home() {
       }
     } catch (err) {
       toast.error("Проблем со серверот.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -534,6 +534,7 @@ export default function Home() {
         email={email}
         setEmail={setEmail}
         onSubmit={handleBookingSubmit}
+        isSubmitting={isSubmitting}
       />
     </div>
   );
